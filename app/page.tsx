@@ -2,8 +2,6 @@
 
 import { useState } from 'react';
 import { BookOpen, Brain, CheckCircle, Loader2 } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 
 type TaskType = 'explain' | 'quiz' | 'notes';
 
@@ -23,17 +21,16 @@ export default function Home() {
     setResult('');
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/generate`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            topic: input,
-            task_type: activeTab,
-          }),
-        }
-      );
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/generate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          topic: input,
+          task_type: activeTab,
+        }),
+      });
 
       if (!response.ok) {
         throw new Error('Failed to generate content');
@@ -66,43 +63,65 @@ export default function Home() {
 
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           <div className="flex border-b border-gray-200">
-            {['explain', 'quiz', 'notes'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab as TaskType)}
-                className={`flex-1 py-4 px-6 font-medium transition-colors ${
-                  activeTab === tab
-                    ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600'
-                    : 'text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                {tab === 'explain' && <BookOpen className="inline mr-2" />}
-                {tab === 'quiz' && <CheckCircle className="inline mr-2" />}
-                {tab === 'notes' && <Brain className="inline mr-2" />}
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
+            <button
+              onClick={() => setActiveTab('explain')}
+              className={`flex-1 py-4 px-6 font-medium transition-colors ${
+                activeTab === 'explain'
+                  ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600'
+                  : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <BookOpen className="w-5 h-5 inline mr-2" />
+              Explain Concept
+            </button>
+            <button
+              onClick={() => setActiveTab('quiz')}
+              className={`flex-1 py-4 px-6 font-medium transition-colors ${
+                activeTab === 'quiz'
+                  ? 'bg-purple-50 text-purple-600 border-b-2 border-purple-600'
+                  : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <CheckCircle className="w-5 h-5 inline mr-2" />
+              Generate Quiz
+            </button>
+            <button
+              onClick={() => setActiveTab('notes')}
+              className={`flex-1 py-4 px-6 font-medium transition-colors ${
+                activeTab === 'notes'
+                  ? 'bg-green-50 text-green-600 border-b-2 border-green-600'
+                  : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <Brain className="w-5 h-5 inline mr-2" />
+              Study Notes
+            </button>
           </div>
 
           <div className="p-8">
             <form onSubmit={handleSubmit} className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {activeTab === 'explain' && 'What concept would you like explained?'}
+                {activeTab === 'quiz' && 'Generate quiz questions for:'}
+                {activeTab === 'notes' && 'Create study notes for:'}
+              </label>
               <div className="flex gap-3">
                 <input
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="e.g., Backpropagation"
-                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-gray-900 font-semibold placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 outline-none"
+                  placeholder="e.g., Binary Search Trees, Photosynthesis, etc."
+                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-gray-900 font-semibold placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   required
                 />
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium flex items-center gap-2 disabled:opacity-50"
+                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {loading ? (
                     <>
-                      <Loader2 className="animate-spin" />
+                      <Loader2 className="w-5 h-5 animate-spin" />
                       Thinking...
                     </>
                   ) : (
@@ -120,18 +139,48 @@ export default function Home() {
 
             {result && (
               <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  className="prose prose-blue max-w-none"
-                >
-                  {result}
-                </ReactMarkdown>
+                <h3 className="font-semibold text-lg mb-4 text-gray-800">Result:</h3>
+                <div className="prose max-w-none">
+                  <pre className="whitespace-pre-wrap font-sans text-gray-700 leading-relaxed">
+                    {result}
+                  </pre>
+                </div>
               </div>
             )}
+
+            {!result && !loading && !error && (
+              <div className="text-center py-12 text-gray-400">
+                <Brain className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                <p>Enter a topic above to get started</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6 mt-8">
+          <div className="bg-white p-6 rounded-xl shadow-md">
+            <BookOpen className="w-10 h-10 text-blue-600 mb-3" />
+            <h3 className="font-semibold text-lg mb-2">Simple Explanations</h3>
+            <p className="text-gray-600 text-sm">
+              Get complex topics explained in easy-to-understand language
+            </p>
+          </div>
+          <div className="bg-white p-6 rounded-xl shadow-md">
+            <CheckCircle className="w-10 h-10 text-purple-600 mb-3" />
+            <h3 className="font-semibold text-lg mb-2">Practice Quizzes</h3>
+            <p className="text-gray-600 text-sm">
+              Test your knowledge with AI-generated quiz questions
+            </p>
+          </div>
+          <div className="bg-white p-6 rounded-xl shadow-md">
+            <Brain className="w-10 h-10 text-green-600 mb-3" />
+            <h3 className="font-semibold text-lg mb-2">Study Materials</h3>
+            <p className="text-gray-600 text-sm">
+              Generate comprehensive notes for any subject
+            </p>
           </div>
         </div>
       </div>
     </div>
   );
 }
-

@@ -24,3 +24,29 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+/* Markdown styling for AI output */
+.prose h1,
+.prose h2,
+.prose h3 {
+  font-weight: 700;
+  color: #1f2937; /* gray-800 */
+}
+
+.prose p {
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.7;
+}
+
+.prose ul {
+  padding-left: 1.5rem;
+  list-style-type: disc;
+}
+
+.prose li {
+  margin-top: 0.4rem;
+}
+
+.prose strong {
+  color: #111827; /* darker bold text */
+}
